@@ -1,117 +1,51 @@
+require 'pry'
+
+SIZE = 9
+NUMBERS = (1..9).to_a
+
 def done_or_not(board)
-  
-  @column_random = []
-  @matrix_validate_first = []
-  @matrix_validate_middle = []
-  @matrix_validate_last = []
-  validate = true
-  
-  board.each_with_index do |row, index_row|
-    validate_row(row)
-    row.each_with_index do |column, index_column|
-      validate_column(row, index_row, column, index_column)
+  @board = board
+  @board.each_with_index do |row, x|
+    row.each_with_index do |column, y|
+      return 'Try again!' if allowed(x,y).size > 1
     end
   end
-  return validate_region(board)
   return 'Finished!'
 end
 
-def validate_column(row, index_row, column, index_column)
-  if index_row <= 9
-    if index_row == 9
-      column unless column.eql? column.uniq
-      @column_random.clear
-    end
-    @column_random << column[index_row][index_column]
-  end
+def row(y)
+  Array.new(@board[y])
 end
 
-def validate_row(row)
-  row unless row.eql? row.uniq
+def column(x)
+  @board.map { |row| row[x] }
 end
 
-def validate_region(board)
-  row_column_of_board(board)
+def allowed_in_row(y)
+  (NUMBERS - row(y)).uniq << nil
 end
 
-def row_column_of_board(board)
-  board.each_with_index do |row, index_row|
-    row.each_with_index do |column, index_column|
-      create_matrix_first(board, index_row, index_column)
-      create_matrix_middle(board, index_row, index_column)
-      create_matrix_last(board, index_row, index_column)
+def allowed_in_column(x)
+  (NUMBERS - column(x)).uniq << nil
+end
 
-      
-      if (@matrix_validate_first.size == 9 && (index_row == 8 && index_column == 2) || (index_row == 2 && index_column == 2) || (index_row == 5 && index_column == 2))
-        return 'Try again!' unless check_matrix(@matrix_validate_first)
-      end
-      
-      if (@matrix_validate_middle.size == 9 && (index_row == 2 && index_column == 5) || (index_row == 5 && index_column == 2) || (index_row == 8 && index_column == 5))
-       return 'Try again!' unless check_matrix(@matrix_validate_middle)
-      end
- 
-      if (@matrix_validate_last.size == 9  && (index_row == 8 && index_column == 8) || (index_row == 5 && index_column == 8) || (index_row == 2 && index_column == 8))
-        return 'Try again!' unless check_matrix(@matrix_validate_last)
-      end
+def allowed_in_square(x,y)
+  square_x = 3 * (x/3)
+  square_y = 3 * (y/3)
+  square = []
+
+  3.times do |row|
+    3.times do |column|
+      square << @board[square_y + column][square_x + row]
     end
   end
+
+  (NUMBERS - square).uniq << nil
 end
 
-def create_matrix_first(board, index_row, index_column)
-  if index_row < 3 && index_column < 3
-    @matrix_validate_first << board[index_row][index_column]
-  elsif (index_row < 5 && index_row > 2) && index_column < 3
-    if index_column == 3
-      @matrix_validate_first.clear
-    end
-    @matrix_validate_first << board[index_row][index_column]
-  elsif index_row > 5 && index_column < 3
-    if index_row == 6
-      @matrix_validate_first.clear
-    end
-    @matrix_validate_first << board[index_row][index_column]
-  end
+def allowed(x,y)
+  allowed_in_row(y) & allowed_in_column(x) & allowed_in_square(x, y)
 end
-
-def create_matrix_middle(board, index_row, index_column)
-  if index_row < 3 && (index_column > 2 && index_column < 6)
-    @matrix_validate_middle << board[index_row][index_column]
-  elsif (index_row > 2 && index_row < 6) && (index_column > 2 && index_column < 6 )
-    if index_column == 3
-      @matrix_validate_middle.clear
-    end
-    @matrix_validate_middle << board[index_row][index_column]
-  elsif index_row > 5 && (index_column > 2 && index_column < 6)
-    if index_column == 6
-      @matrix_validate_middle.clear
-    end
-    @matrix_validate_middle << board[index_row][index_column]
-  end
-end
-
-def create_matrix_last(board, index_row, index_column)
-
-  puts "Last: #{@matrix_validate_last} = board[#{index_row}][#{index_column}]"
-  if index_row <= 2 && (index_column > 5 && index_column < 8)
-    @matrix_validate_last << board[index_row][index_column]
-  elsif (index_row > 2 && index_row < 6) && (index_column > 5 && index_column < 8)
-    if index_column == 3
-      @matrix_validate_last.clear
-    end
-    @matrix_validate_last << board[index_row][index_column]
-  elsif index_row > 5 && (index_column > 5 && index_column < 8)
-    if index_column == 6
-      @matrix_validate_last.clear
-    end
-    @matrix_validate_last << board[index_row][index_column]
-  end
-end
-
-def check_matrix(matrix)
-  puts "([1,2,3,4,5,6,7,8,9] - #{matrix}).empty? && (#{matrix}matrix.eql? #{matrix.uniq}) = #{([1,2,3,4,5,6,7,8,9] - matrix).empty? && (matrix.eql? matrix.uniq)}"
-  ([1,2,3,4,5,6,7,8,9] - matrix).empty? && (matrix.eql? matrix.uniq)
-end
-
 
 puts done_or_not(
     [
