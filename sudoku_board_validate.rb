@@ -1,50 +1,23 @@
-require 'pry'
-
-SIZE = 9
-NUMBERS = (1..9).to_a
-
 def done_or_not(board)
-  @board = board
-  @board.each_with_index do |row, x|
-    row.each_with_index do |column, y|
-      return 'Try again!' if allowed(x,y).size > 1
-    end
-  end
-  return 'Finished!'
+  check_rows(board) && check_regions(board) && check_cols(board) ? "Finished!" : "Try again!"
 end
 
-def row(y)
-  Array.new(@board[y])
+def check_regions(board)
+  slices = board.each_slice(3).to_a
+  regions = slices.map { |slice| slice.transpose.reduce(:+).each_slice(9).to_a }.reduce(:+)
+  regions.map { |region| check_sum(region) }.reduce(:&)
 end
 
-def column(x)
-  @board.map { |row| row[x] }
+def check_rows(board)
+  board.map { |region| check_sum(region) }.reduce(:&)
 end
 
-def allowed_in_row(y)
-  (NUMBERS - row(y)).uniq << nil
+def check_cols(board)
+  board.transpose.map { |region| check_sum(region) }.reduce(:&)
 end
 
-def allowed_in_column(x)
-  (NUMBERS - column(x)).uniq << nil
-end
-
-def allowed_in_square(x,y)
-  square_x = 3 * (x/3)
-  square_y = 3 * (y/3)
-  square = []
-
-  3.times do |row|
-    3.times do |column|
-      square << @board[square_y + column][square_x + row]
-    end
-  end
-
-  (NUMBERS - square).uniq << nil
-end
-
-def allowed(x,y)
-  allowed_in_row(y) & allowed_in_column(x) & allowed_in_square(x, y)
+def check_sum(region)
+  region.reduce(:+) == 45
 end
 
 puts done_or_not(
@@ -76,6 +49,22 @@ puts done_or_not(
     [3, 0, 0, 4, 8, 1, 1, 7, 9]
  ]
 )    
+
+puts '---------------------------'
+
+puts done_or_not(
+  [
+    [5, 3, 4, 6, 7, 8, 9, 1, 2], 
+    [6, 7, 2, 1, 8, 0, 3, 4, 9],
+    [1, 0, 7, 3, 4, 2, 5, 6, 8],
+    [8, 5, 9, 7, 6, 1, 4, 2, 3],
+    [4, 2, 6, 8, 5, 3, 7, 9, 1],
+    [7, 1, 3, 9, 2, 4, 8, 5, 6],
+    [9, 6, 1, 5, 3, 7, 2, 1, 4],
+    [2, 8, 7, 4, 1, 9, 6, 3, 5],
+    [3, 2, 4, 5, 8, 6, 1, 7, 9]
+ ]
+)   
 
 
 # Test.assert_equals(done_or_not([[5, 3, 4, 6, 7, 8, 9, 1, 2], 
