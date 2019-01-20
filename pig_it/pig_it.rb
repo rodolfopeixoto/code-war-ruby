@@ -1,5 +1,3 @@
-require 'pry'
-
 def pig_it text
   text.gsub(/(\w)(\w*)(\s|$)/, '\2\1ay\3')    
 end
