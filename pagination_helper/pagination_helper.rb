@@ -1,6 +1,7 @@
 # TODO: complete this class
 
 class PaginationHelper
+  attr_reader :collection, :items_per_page
 
     # The constructor takes in an array of items and a integer indicating how many
     # items fit within a single page
@@ -11,35 +12,26 @@ class PaginationHelper
     
     # returns the number of items within the entire collection
     def item_count
-      @collection.length
+      @collection.size
     end
       
     # returns the number of pages
     def page_count
-      (item_count.to_f / @items_per_page.to_f).ceil
+      (item_count.to_f / items_per_page).ceil
     end
       
     # returns the number of items on the current page. page_index is zero based.
     # this method should return -1 for page_index values that are out of range
     def page_item_count(page_index)
-    
-      page_item_next_to_last = (@items_per_page * (page_count - 1))
-      page_item_last = item_count - page_item_next_to_last
-      range_number_page = (0..(page_count - 1)).to_a
-      
-      return page_item_last if range_number_page[-1] == page_index
-      return -1 unless range_number_page.include? page_index
-      return @items_per_page if range_number_page.include? page_index
+      index = collection[page_index * items_per_page...page_index *  items_per_page + items_per_page]
+      index ? index.size : - 1
     end
       
     # determines what page an item is on. Zero based indexes.
     # this method should return -1 for item_index values that are out of range
-    def page_index(item_index) 
-     page_item_index = ((item_index.to_f) / @items_per_page.to_f).floor
-
-     return -1 if @collection[item_index].nil? || item_index < 0
-     return page_item_index
-
+    def page_index(item_index)
+      return -1 unless (0...item_count).include? item_index
+      page = item_index / items_per_page  
     end
   end
 
